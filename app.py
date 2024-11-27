@@ -38,6 +38,7 @@ def remove_background():
 
 # Get the port number from the environment or default to 5000
 # port = int(os.environ.get('PORT', 5000))
-
+port = int(os.environ.get('PORT', 5000))
 if __name__ == '__main__':
-    app.run(host='0.0.0.0')
+    
+    app.run(host='0.0.0.0',port)
