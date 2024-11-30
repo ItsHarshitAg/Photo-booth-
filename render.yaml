@@ -1,11 +1,20 @@
+# Exported from Render on 2024-11-30T10:10:40Z
 services:
-  - type: web
-    name: flask-app
-    env: python
-    runtime: python3
-    buildCommand: "pip install -r requirements.txt"
-    startCommand: "python app.py"
-    envVars:
-      - key: PORT
-        value: 8000  # Render automatically sets a PORT environment variable; this is optional
-    healthCheckPath: "/"
+- type: web
+  name: Photobooth
+  runtime: python
+  repo: https://github.com/ItsHarshitAg/Photo-booth-
+  plan: free
+  envVars:
+  - key: PORT
+    sync: false
+  - key: port
+    sync: false
+  - key: port
+    sync: false
+  - key: PORT
+    sync: false
+  region: oregon
+  buildCommand: pip install -r requirements.txt
+  startCommand: gunicorn app:app
+version: "1"
