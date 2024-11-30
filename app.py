@@ -6,7 +6,7 @@ from rembg import remove
 import os
 
 app = Flask(__name__)
-port = int(os.environ.get("PORT", 5000))
+port = int(os.environ.get("PORT", 8000))
 @app.route('/')
 def index():
     return render_template('index.html')
@@ -55,5 +55,5 @@ def remove_background():
         return jsonify({"error": "An error occurred while processing the image."}), 500
 
 if __name__ == '__main__':
-    port = int(os.environ.get('PORT', 5000))  # Default to 5000 if PORT is not set
+    port = int(os.environ.get('PORT', 8000))  # Default to 5000 if PORT is not set
     app.run(host='0.0.0.0', port=port)
