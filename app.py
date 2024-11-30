@@ -9,7 +9,7 @@ app = Flask(__name__)
 port = int(os.environ.get("PORT", 5000))
 @app.route('/')
 def index():
-    return render_template('index3.html')
+    return render_template('index.html')
 
 @app.route('/remove-background', methods=['POST'])
 def remove_background():
