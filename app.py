@@ -54,5 +54,6 @@ def remove_background():
         print(f"Error: {e}")
         return jsonify({"error": "An error occurred while processing the image."}), 500
 
-port=os.getenv('PORT', 5000)
-app.run(debug=True)
+if __name__ == "__main__":
+       port = int(os.environ.get("PORT", 5000))
+       app.run(host="0.0.0.0", port=port)
