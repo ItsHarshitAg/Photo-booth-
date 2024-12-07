@@ -71,6 +71,41 @@
         }
 
         .upload-button {
+            background-color: white;
+            color: black;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 20px;
+            padding: 12px 24px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+            margin-top: 15px;
+        }
+
+        .upload-button:hover {
+            background-color: #4c4c4c;
+        }
+
+        /* File Input Styling */
+        .file-input-wrapper {
+            position: relative;
+            display: inline-block;
+            width: 100%;
+        }
+
+        .file-input-wrapper input[type="file"] {
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .file-input-custom {
             background-color: #646464;
             color: white;
             font-size: 18px;
@@ -80,10 +115,20 @@
             padding: 12px 24px;
             cursor: pointer;
             transition: background-color 0.3s;
+            display: inline-block;
+            width: 100%;
         }
 
-        .upload-button:hover {
+        .file-input-custom:hover {
             background-color: #4c4c4c;
+        }
+
+        .file-name {
+            margin-top: 10px;
+            font-size: 16px;
+            color: #333;
+            text-align: center;
+            word-break: break-all;
         }
 
         /* Background Options */
@@ -170,6 +215,12 @@
             height: 40px;
             animation: spin 1s linear infinite;
             display: none;
+            margin: 20px auto;
+        }
+
+        #replace-bg-button {
+            margin-top: 40px;
+            width: 90%;
         }
 
         @keyframes spin {
@@ -197,9 +248,11 @@
 
         <!-- Upload Form -->
         <form class="upload-container" id="upload-form">
-            <input type="file" id="image" name="image" accept="image/*" required>
-            <br><br>
-            <button type="submit" class="upload-button">Remove Background</button>
+            <div class="file-input-wrapper">
+                <input type="file" id="image" name="image" accept="image/*" required>
+                <label for="image" class="file-input-custom">Choose Image</label>
+            </div>
+            <div class="file-name">No file chosen</div>
         </form>
 
         <!-- Background Options -->
@@ -219,6 +272,9 @@
             </div>
         </div>
 
+        <!-- Replace Background Button -->
+        <button id="replace-bg-button" class="upload-button" disabled>Replace Background</button>
+
         <!-- Output Image -->
         <div class="image-container" id="output-container">
             <div class="loader" id="loader"></div>
@@ -229,62 +285,114 @@
 
     <script>
         let selectedBackground = null;
+        let imageUploaded = false;
 
-// Select the background
-document.querySelectorAll('.try-button').forEach(button => {
-    button.addEventListener('click', () => {
-        selectedBackground = button.previousElementSibling.src;
-        alert("Background selected! Please upload an image.");
-    });
-});
+        // Enable Replace Background button if both conditions are met
+        function checkConditions() {
+            const replaceBgButton = document.getElementById('replace-bg-button');
+            if (selectedBackground && imageUploaded) {
+                replaceBgButton.disabled = false;
+            } else {
+                replaceBgButton.disabled = true;
+            }
+        }
 
-// Handle form submission
-document.getElementById('upload-form').addEventListener('submit', async (e) => {
-    e.preventDefault();
+        // Handle background selection
+        document.querySelectorAll('.try-button').forEach(button => {
+            button.addEventListener('click', () => {
+                // Reset all buttons to "Try"
+                document.querySelectorAll('.try-button').forEach(btn => btn.textContent = 'Try');
 
-    const loader = document.getElementById('loader');
-    loader.style.display = 'block';
+                // Update clicked button to "Selected"
+                button.textContent = 'Selected';
 
-    const fileInput = document.getElementById('image');
-    if (!fileInput.files[0]) {
-        loader.style.display = 'none';
-        return alert("Please upload an image first!");
-    }
-
-    if (!selectedBackground) {
-        loader.style.display = 'none';
-        return alert("Please select a background first!");
-    }
-
-    const formData = new FormData();
-    formData.append('image', fileInput.files[0]);
-    formData.append('background', selectedBackground); // Add the selected background URL
-
-    try {
-        const response = await fetch('/remove-background', {
-            method: 'POST',
-            body: formData,
+                // Set selected background
+                selectedBackground = button.previousElementSibling.src;
+                checkConditions(); // Check if both conditions are met
+            });
         });
 
-        if (!response.ok) throw new Error("Image processing failed!");
 
-        const blob = await response.blob();
-        const img = new Image();
-        img.src = URL.createObjectURL(blob);
+        // Handle file input
+        document.getElementById('image').addEventListener('change', (e) => {
+            imageUploaded = !!e.target.files[0];
+            checkConditions();
+        });
 
-        img.onload = () => {
-            loader.style.display = 'none';
-            const output = document.getElementById('output-container');
-            output.innerHTML = '';
-            output.appendChild(img);
-            img.classList.add('output-image');
-        };
-    } catch (error) {
-        loader.style.display = 'none';
-        alert(error.message);
-    }
-});
+        // Handle file input and display file name
+        document.getElementById('image').addEventListener('change', (e) => {
+            const fileNameDisplay = document.querySelector('.file-name');
+            const file = e.target.files[0];
+            if (file) {
+                fileNameDisplay.textContent = file.name; 
+                imageUploaded = true; 
+            } else {
+                fileNameDisplay.textContent = 'No file chosen'; 
+                imageUploaded = false;
+            }
+            checkConditions(); 
+        });
+
+        // Handle Replace Background button click
+        document.getElementById('replace-bg-button').addEventListener('click', async () => {
+            const loader = document.getElementById('loader');
+            loader.style.display = 'block';
+
+            const fileInput = document.getElementById('image');
+            if (!fileInput.files[0]) {
+                loader.style.display = 'none';
+                return alert("Please upload an image first!");
+            }
+
+            if (!selectedBackground) {
+                loader.style.display = 'none';
+                return alert("Please select a background first!");
+            }
+
+            const formData = new FormData();
+            formData.append('image', fileInput.files[0]);
+            formData.append('background', selectedBackground);
+
+            try {
+                const response = await fetch('/remove-background', {
+                    method: 'POST',
+                    body: formData,
+                });
+
+                if (!response.ok) throw new Error("Image processing failed!");
+
+                const blob = await response.blob();
+                const img = new Image();
+                const output = document.getElementById('output-container');
+                img.src = URL.createObjectURL(blob);
+
+                img.onload = () => {
+                    loader.style.display = 'none';
+                    output.innerHTML = ''; 
+                    output.appendChild(img); 
+                    img.classList.add('output-image');
+
+                    // Create and append the download button
+                    const downloadButton = document.createElement('button');
+                    downloadButton.textContent = 'Download Image';
+                    downloadButton.className = 'upload-button'; 
+                    downloadButton.style.marginTop = '20px';
+
+                    downloadButton.addEventListener('click', () => {
+                        const link = document.createElement('a');
+                        link.href = img.src;
+                        link.download = 'processed-image.png';
+                        link.click();
+                    });
+
+                    output.appendChild(downloadButton);
+                };
+            } catch (error) {
+                loader.style.display = 'none';
+                alert(error.message);
+            }
+        });
+
     </script>
 </body>
-
 </html>
